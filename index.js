@@ -3,13 +3,9 @@ canvas.height = 900
 
 let ctx = canvas.getContext("2d")
 
-function track(ctx, lastDrawTime, speed) {
+function track(ctx, yOffset) {
 	const curbWidth = 35
 	const curbHeight = 35
-
-	// Draw only a certain amount relative to the speed and last draw time and now
-	let timeDiff = Date.now() - lastDrawTime
-
 
 	let width = 0.35 * ctx.canvas.width
 	let height = ctx.canvas.height
@@ -25,26 +21,22 @@ function track(ctx, lastDrawTime, speed) {
 	ctx.fillRect(targetX, 0, width, ctx.canvas.height)
 
 	let numberOfCurbs = Math.ceil(height / curbHeight) + 1
-	let y = 0
-
-
 	for (let i = 0; i < numberOfCurbs; i++) {
 		// Draw left curb
-		curb(ctx, leftCurbX, y + (i * curbHeight), curbHeight, curbWidth, i % 2 == 0)
+		let y = (i * curbHeight) - yOffset
+		curb(ctx, leftCurbX, y, curbHeight, curbWidth, i % 2 == 0)
 
 		// Draw right curb
-		curb(ctx, rightCurbX, y + (i * curbHeight), curbHeight, curbWidth, !(i % 2 == 0))
+		curb(ctx, rightCurbX, y, curbHeight, curbWidth, !(i % 2 == 0))
 	}
 
 	function curb(ctx, x, y, w, h, even) {
 		ctx.strokeStyle = "white"
 		ctx.strokeRect(x, y, w, h)
 
-		ctx.fillStyle = even ? "red" : "yellow"
+		ctx.fillStyle = even ? "red" : "white"
 		ctx.fillRect(x, y, w, h)
 	}
-
-
 }
 
 function scene(ctx) {
@@ -60,13 +52,12 @@ function timer() {
 
 	let ret = {
 		start: function() {
-			let loop = setInterval(() => {
-				window.requestAnimationFrame(ts => {
-					if (this.callback) {
-						this.callback(ts)
-					}
-				})
-			}, interval)
+			window.requestAnimationFrame(ts => {
+				if (this.callback) {
+					this.callback(ts)
+				}
+				this.start()
+			})
 		},
 
 		on: function(func) {
@@ -78,8 +69,13 @@ function timer() {
 	return ret
 
 }
-let lastTs = 0
-timer().on(ts => track(scene(ctx), lastTs, 5)).start()
+let offset = 35
+let firstDraw = Date.now()
+timer().on(ts => {
+	offset--
+	if (offset < 1) offset = 35
+	track(scene(ctx), offset)
+}).start()
 	
 
 
