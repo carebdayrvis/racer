@@ -24,6 +24,7 @@ function track(ctx, yOffset) {
 	for (let i = 0; i < numberOfCurbs; i++) {
 		// Draw left curb
 		let y = (i * curbHeight) - yOffset
+
 		curb(ctx, leftCurbX, y, curbHeight, curbWidth, i % 2 == 0)
 
 		// Draw right curb
@@ -69,13 +70,16 @@ function timer() {
 	return ret
 
 }
-let offset = 35
-let firstDraw = Date.now()
-timer().on(ts => {
-	offset--
-	if (offset < 1) offset = 35
-	track(scene(ctx), offset)
-}).start()
+
+function trackAnimator() {
+	let i = 0
+	timer().on(ts => {
+		track(scene(ctx), i--)
+	}).start()
+
+}
+
+trackAnimator()
 	
 
 
